@@ -63,25 +63,40 @@ def bot_message(message):
             n = bot.reply_to(message, x + ':', reply_markup=markup)
             bot.register_next_step_handler(n, func5, translate, dict, wrong, right, x, right1, wrong1)
 
-def func23(message, translate, dict, wrong, right, right1, wrong1, x):
 
-
-
-def func22(word, translate, dict, wrong, right, m, right1, wrong1, x):
-    id = word.from_user.id
-    word1 = word.text
+def func24(word1, word, translate, dict, wrong, right, right1, wrong1, x):
     with con:
-        '''cursor.execute('update words set translate = ? where num = ? and id = ?', (word1, m, id,))'''
-        cursor.execute('delete from words where id = ? and word = ?;', (id,))
+        cursor.execute('insert into words (num, id, word, translate) values (?,?,?,?)', (x, word1.from_user.id, word, word1.text,))
+    markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    button_1 = KeyboardButton('Изменить / удалить')
+    button_2 = KeyboardButton('Добавить')
+    button_3 = KeyboardButton('Удалить модуль')
+    button_4 = KeyboardButton('Назад')
+    markup.add(button_1, button_2, button_3, button_4)
+    n = bot.reply_to(word1, 'Слово успешно добавлено', reply_markup=markup)
+    bot.register_next_step_handler(n, func9, translate, dict, wrong, right, x, right1, wrong1)
+
+
+
+def func23(message, translate, dict, wrong, right, right1, wrong1, x):
+    d = bot.reply_to(message, 'Перевод')
+    bot.register_next_step_handler(d, func24, message.text, translate, dict, wrong, right, right1, wrong1, x)
+
+
+def func22(word1, word, translate, dict, wrong, right, m, right1, wrong1, x, z):
+    id = word1.from_user.id
+    with con:
+        cursor.execute('delete from words where id = ? and word = ? and num = ?;', (id, z, x,))
+        cursor.execute('insert into words (num, id, word, translate) values (?,?,?,?)',(x, id, word, word1.text,))
     markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     button_1 = KeyboardButton('Редактировать')
     button_2 = KeyboardButton('Удалить')
     button_3 = KeyboardButton('Назад')
     markup.add(button_1, button_2, button_3)
-    n = bot.reply_to(word, 'Слово успешно изменено', reply_markup=markup)
-    bot.register_next_step_handler(n, func14, translate, dict, wrong, right, m, right1, wrong1, x)
+    n = bot.reply_to(word1, 'Слово успешно изменено', reply_markup=markup)
+    bot.register_next_step_handler(n, func14, translate, dict, wrong, right, m, right1, wrong1, x, z)
 
-def func21(word, translate, dict, wrong, right, m, right1, wrong1, x):
+def func21(word, translate, dict, wrong, right, m, right1, wrong1, x, z):
     if word.text == 'Отмена':
         markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
         button_1 = KeyboardButton('Редактировать')
@@ -92,7 +107,7 @@ def func21(word, translate, dict, wrong, right, m, right1, wrong1, x):
         bot.register_next_step_handler(n, func14, translate, dict, wrong, right, m, right1, wrong1, x)
     else:
         d = bot.reply_to(word, 'Перевод')
-        bot.register_next_step_handler(d, func22, translate, dict, wrong, right, m, right1, wrong1, x)
+        bot.register_next_step_handler(d, func22, word.text, translate, dict, wrong, right, m, right1, wrong1, x, z)
 
 
 def func20(message, translate, dict, wrong, right, x, right1, wrong1):
@@ -154,10 +169,10 @@ def func15(message, translate, dict, wrong, right, m, right1, wrong1, x):
     bot.register_next_step_handler(n, func16, translate, dict, wrong, right, m, right1, wrong1, x)
 
 
-def func14(message, translate, dict, wrong, right, m, right1, wrong1, x):
+def func14(message, translate, dict, wrong, right, m, right1, wrong1, x, z):
     if message.text == 'Редактировать':
         n = bot.reply_to(message, 'Введите слово на иностранном языке')
-        bot.register_next_step_handler(n, func21, translate, dict, wrong, right, m, right1, wrong1, x)
+        bot.register_next_step_handler(n, func21, translate, dict, wrong, right, m, right1, wrong1, x, z)
 
     elif message.text == 'Удалить':
         func15(message, translate, dict, wrong, right, m, right1, wrong1, x)
@@ -174,7 +189,8 @@ def func13(message, translate, dict, wrong, right, m, right1, wrong1, x):
             button_3 = KeyboardButton('Назад')
             markup.add(button_1, button_2, button_3)
             n = bot.reply_to(message, i, reply_markup=markup)
-            bot.register_next_step_handler(n, func14, translate, dict, wrong, right, i, right1, wrong1, x)
+            z = i.split()[0]
+            bot.register_next_step_handler(n, func14, translate, dict, wrong, right, i, right1, wrong1, x, z)
 
 
 def func12(message, translate, dict, wrong, right, right1, wrong1, x):
