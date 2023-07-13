@@ -37,7 +37,6 @@ def menu(message):
 
 @bot.message_handler(content_types=['text'])
 def bot_message(message):
-    printed = []
     right1 = []
     wrong1 = []
     right = []
