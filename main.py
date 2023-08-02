@@ -56,9 +56,10 @@ def bot_message(message):
         if message.text == x:
             markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
             button_1 = KeyboardButton('Редактировать')
-            button_2 = KeyboardButton('Изучать')
-            button_3 = KeyboardButton('Просмотреть')
-            markup.add(button_1, button_2, button_3)
+            button_2 = KeyboardButton('Просмотреть')
+            button_3 = KeyboardButton('Заучивание')
+            button_4 = KeyboardButton('Тест')
+            markup.add(button_1, button_2, button_3, button_4)
             n = bot.reply_to(message, x + ':', reply_markup=markup)
             bot.register_next_step_handler(n, func5, translate, dict, wrong, right, x, right1, wrong1)
 
@@ -279,15 +280,67 @@ def func5(message, translate, dict, wrong, right, x, right1, wrong1):
         for b in data2:
             translate.append(b[3])
             dict.append(b[2])
-    if message.text == 'Изучать':
-        bot.reply_to(message, 'Для выхода нажмите /stop')
+    if message.text == 'Тест':
+        bot.reply_to(message, 'Для выхода нажмите в меню /stop')
         func3(message, translate, dict, wrong, right, right1, wrong1)
+
+    if message.text == 'Заучивание':
+        bot.reply_to(message, 'Для выхода в меню нажмите /stop')
+        learn(message, translate, dict, wrong, right)
 
     if message.text == 'Редактировать':
         func8(message, translate, dict, wrong, right, right1, wrong1, x)
 
     if message.text == 'Просмотреть':
         func7(message, translate, dict, wrong, right, x, right1, wrong1)
+
+def learn(message, translate, dict, wrong, right):
+    if message.text == '/stop':
+        markup = InlineKeyboardMarkup(row_width=1)
+        button_1 = InlineKeyboardButton(text='Выйти в меню', callback_data='1')
+        markup.add(button_1)
+        bot.reply_to(message, 'Всё', reply_markup=markup)
+        return
+    n = []
+    m = []
+    g = random.randrange(len(translate))
+    for i in dict:
+        if i != dict[g]:
+            if len(m) == 3:
+                markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                button_1 = KeyboardButton(dict[g])
+                button_2 = KeyboardButton(m[0])
+                button_3 = KeyboardButton(m[1])
+                button_4 = KeyboardButton(m[2])
+                n.append(button_4)
+                n.append(button_3)
+                n.append(button_2)
+                n.append(button_1)
+                while n != []:
+                    z = random.choices(n, k=1)
+                    markup.add(z)
+                    n.remove(z)
+                t = bot.reply_to(message, translate[g], reply_markup= markup)
+                bot.register_next_step_handler(t, learn1, translate, dict, g, wrong, right)
+            m.append(i)
+
+def learn1(message, translate, dict, n, wrong, right):
+    if message.text == '/stop':
+        markup = InlineKeyboardMarkup(row_width=1)
+        button_1 = InlineKeyboardButton(text='Выйти в меню', callback_data='1')
+        markup.add(button_1)
+        bot.reply_to(message, 'Всё', reply_markup=markup)
+        return
+    if message.text == dict[n]:
+        bot.reply_to(message, '✅ Правильно ✅')
+        right.append(dict[n])
+        del translate[n]
+        del dict[n]
+        learn(message, translate, dict, wrong, right)
+    else:
+        wrong.append(dict[n])
+        bot.reply_to(message, '❌ Не правильно ❌, ' + dict[n])
+        learn(message, translate, dict, wrong, right)
 
 def func3(message, translate, dict, wrong, right, right1, wrong1):
     right2 = ''
@@ -376,6 +429,7 @@ def callback(call):
         markup = InlineKeyboardMarkup(row_width=1)
         button_1 = InlineKeyboardButton(text='Создать модуль', callback_data='2')
         button_2 = InlineKeyboardButton(text='Мои модули', callback_data='3')
+        button_3 = InlineKeyboardButton(text='Мои папки', callback_data='4')
         markup.add(button_1, button_2)
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text='Helper menu:',reply_markup=markup)
 
@@ -403,6 +457,8 @@ def callback(call):
                 x = KeyboardButton(m)
                 markup.add(x)
             bot.reply_to(call.message, 'Вот ваши модули', reply_markup=markup)
+    '''elif call.data == '4':
+        '''
 
 
 
