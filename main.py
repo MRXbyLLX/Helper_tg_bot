@@ -210,9 +210,10 @@ def func12(message, translate, dict, wrong, right, right1, wrong1, x):
 def func11(message, translate, dict, wrong, right, x, right1, wrong1):
     markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     button_1 = KeyboardButton('Редактировать')
-    button_2 = KeyboardButton('Изучать')
-    button_3 = KeyboardButton('Просмотреть')
-    markup.add(button_1, button_2, button_3)
+    button_2 = KeyboardButton('Просмотреть')
+    button_3 = KeyboardButton('Заучивание')
+    button_4 = KeyboardButton('Тест')
+    markup.add(button_1, button_2, button_3, button_4)
     n = bot.reply_to(message, x + ':', reply_markup=markup)
     bot.register_next_step_handler(n, func5, translate, dict, wrong, right, x, right1, wrong1)
 
@@ -254,9 +255,10 @@ def func8(message, translate, dict, wrong, right, right1, wrong1, x):
 def func7(message, translate, dict, wrong, right, x, right1, wrong1):
     markup = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     button_1 = KeyboardButton('Редактировать')
-    button_2 = KeyboardButton('Изучать')
-    button_3 = KeyboardButton('Просмотреть')
-    markup.add(button_1, button_2, button_3)
+    button_2 = KeyboardButton('Просмотреть')
+    button_3 = KeyboardButton('Заучивание')
+    button_4 = KeyboardButton('Тест')
+    markup.add(button_1, button_2, button_3, button_4)
     l = ''
     for c in dict:
         l += c + ' - ' + translate[dict.index(c)] + '\n'
@@ -286,7 +288,7 @@ def func5(message, translate, dict, wrong, right, x, right1, wrong1):
 
     if message.text == 'Заучивание':
         bot.reply_to(message, 'Для выхода в меню нажмите /stop')
-        learn(message, translate, dict, wrong, right)
+        learn(message, translate, dict, wrong, right, right1, wrong1)
 
     if message.text == 'Редактировать':
         func8(message, translate, dict, wrong, right, right1, wrong1, x)
@@ -294,53 +296,65 @@ def func5(message, translate, dict, wrong, right, x, right1, wrong1):
     if message.text == 'Просмотреть':
         func7(message, translate, dict, wrong, right, x, right1, wrong1)
 
-def learn(message, translate, dict, wrong, right):
-    if message.text == '/stop':
-        markup = InlineKeyboardMarkup(row_width=1)
-        button_1 = InlineKeyboardButton(text='Выйти в меню', callback_data='1')
-        markup.add(button_1)
-        bot.reply_to(message, 'Всё', reply_markup=markup)
-        return
-    n = []
+def learn(message, translate, dict, wrong, right, right1, wrong1):
+    z = ''
+    n = ''
     m = []
     g = random.randrange(len(translate))
-    for i in dict:
-        if i != dict[g]:
-            if len(m) == 3:
-                markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-                button_1 = KeyboardButton(dict[g])
-                button_2 = KeyboardButton(m[0])
-                button_3 = KeyboardButton(m[1])
-                button_4 = KeyboardButton(m[2])
-                n.append(button_4)
-                n.append(button_3)
-                n.append(button_2)
-                n.append(button_1)
-                while n != []:
-                    z = random.choices(n, k=1)
-                    markup.add(z)
-                    n.remove(z)
-                t = bot.reply_to(message, translate[g], reply_markup= markup)
-                bot.register_next_step_handler(t, learn1, translate, dict, g, wrong, right)
-            m.append(i)
+    if len(wrong + right) % 7 == 0 and len(wrong + right) != 0:
+        for i in wrong:
+            if len(wrong) < 2 or i == wrong[len(wrong) - 1]:
+                z += i
+            else:
+                z += i + ';\n'
+        for t in right:
+            if len(right) < 2 or t == right[len(right) - 1]:
+                n += t
+            else:
+                n += t + ';\n'
+        bot.reply_to(message, '❌ Не правильных ' + str(len(wrong)) + ' ❌:\n' + z + '\n' + '✅ Правильных ' + str(len(right)) + ' ✅:\n' + n)
+    gx = right1.count(dict[g])
+    if gx == 0:
+        for i in dict:
+            if i != dict[g]:
+                if len(m) == 3:
+                    m.append(dict[g])
+                    random.shuffle(m)
+                    markup = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+                    for f in m:
+                        button_1 = KeyboardButton(f)
+                        markup.add(button_1)
+                    t = bot.reply_to(message, translate[g], reply_markup= markup)
+                    bot.register_next_step_handler(t, learn1, translate, dict, g, wrong, right, right1, wrong1)
+                m.append(i)
 
-def learn1(message, translate, dict, n, wrong, right):
+    else:
+        t = bot.reply_to(message, translate[g])
+        bot.register_next_step_handler(t, learn1, translate, dict, g, wrong, right, right1, wrong1)
+
+
+
+def learn1(message, translate, dict, n, wrong, right, right1, wrong1):
     if message.text == '/stop':
         markup = InlineKeyboardMarkup(row_width=1)
         button_1 = InlineKeyboardButton(text='Выйти в меню', callback_data='1')
         markup.add(button_1)
         bot.reply_to(message, 'Всё', reply_markup=markup)
         return
+    gx = right1.count(dict[n])
     if message.text == dict[n]:
         bot.reply_to(message, '✅ Правильно ✅')
-        right.append(dict[n])
-        del translate[n]
-        del dict[n]
-        learn(message, translate, dict, wrong, right)
+        if gx == 0:
+            right1.append(dict[n])
+        else:
+            right.append(dict[n])
+            del translate[n]
+            del dict[n]
+        learn(message, translate, dict, wrong, right, right1, wrong1)
     else:
         wrong.append(dict[n])
         bot.reply_to(message, '❌ Не правильно ❌, ' + dict[n])
-        learn(message, translate, dict, wrong, right)
+        learn(message, translate, dict, wrong, right, right1, wrong1)
 
 def func3(message, translate, dict, wrong, right, right1, wrong1):
     right2 = ''
